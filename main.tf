@@ -159,10 +159,9 @@ resource "aws_route_table" "rt-private" {
 }
 
 resource "aws_route_table" "rt-public" {
-  for_each = var.azs
   vpc_id = aws_vpc.vpc_1.id
   tags= {
-    Name = "rt-public-${var.aws_region}-${each.key}"
+    Name = "rt-public-${var.aws_region}"
   }
 }
 
@@ -176,7 +175,7 @@ resource "aws_route_table_association" "rt-private" {
 resource "aws_route_table_association" "rt-public" {
   for_each = var.azs
   subnet_id = aws_subnet.public[each.key].id
-  route_table_id = aws_route_table.rt-public[each.key].id
+  route_table_id = aws_route_table.rt-public.id
 }
 
 // create 1 route for each private subnet
@@ -189,8 +188,7 @@ resource "aws_route" "rt-private" {
 
 // 1 route for public subnet
 resource "aws_route" "rt-public" {
-  for_each = var.azs
-  route_table_id = aws_route_table.rt-public[each.key].id
+  route_table_id = aws_route_table.rt-public.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id = aws_internet_gateway.igw.id
 }
