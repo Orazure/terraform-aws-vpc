@@ -73,6 +73,24 @@ data "aws_ami" "nat_ami_vtp" {
 
 }
 
+// create ami with ubuntu 20.04
+
+data "aws_ami" "ubuntu_ami" {
+  most_recent = true
+  owners = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+}
+
 resource "aws_security_group" "allowAllEgress" {
 
   name = "allowAllIngress"
@@ -98,6 +116,47 @@ resource "aws_security_group_rule" "allowSshIntoVpc" {
   security_group_id = aws_security_group.allowAllEgress.id
 }
 
+//allow all port tcp
+resource "aws_security_group_rule" "allowAllTcp" {
+  type = "ingress"
+  from_port = 0
+  to_port = 65535
+  protocol = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allowAllEgress.id
+}
+
+
+
+resource "aws_security_group_rule" "allowHttpAndHttps" {
+  type = "ingress"
+  from_port = 80
+  to_port = 80
+  protocol = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allowAllEgress.id
+}
+
+resource "aws_security_group_rule" "allowHttpAndHttps2" {
+  type = "ingress"
+  from_port = 443
+  to_port = 443
+  protocol = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allowAllEgress.id
+}
+
+//allow icmp ping
+resource "aws_security_group_rule" "allowPing" {
+  type = "ingress"
+  from_port = 0
+  to_port = 0
+  protocol = "icmp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allowAllEgress.id
+}
+
+
 
 
 resource "aws_key_pair" "auth_key_pair" {
@@ -110,7 +169,7 @@ resource "aws_instance" "ec2_instance_private_subnet" {
   for_each = var.azs
   subnet_id = aws_subnet.private[each.key].id
   vpc_security_group_ids = [aws_security_group.allowAllEgress.id]
-  ami = data.aws_ami.nat_ami_vtp.id
+  ami = data.aws_ami.ubuntu_ami.id
   key_name = aws_key_pair.auth_key_pair.key_name
   instance_type = "t2.micro"
   source_dest_check = false
