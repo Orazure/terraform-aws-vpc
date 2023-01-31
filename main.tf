@@ -116,17 +116,6 @@ resource "aws_security_group_rule" "allowSshIntoVpc" {
   security_group_id = aws_security_group.allowAllEgress.id
 }
 
-//allow all port tcp
-resource "aws_security_group_rule" "allowAllTcp" {
-  type = "ingress"
-  from_port = 0
-  to_port = 65535
-  protocol = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.allowAllEgress.id
-}
-
-
 
 resource "aws_security_group_rule" "allowHttpAndHttps" {
   type = "ingress"
@@ -146,15 +135,7 @@ resource "aws_security_group_rule" "allowHttpAndHttps2" {
   security_group_id = aws_security_group.allowAllEgress.id
 }
 
-//allow icmp ping
-resource "aws_security_group_rule" "allowPing" {
-  type = "ingress"
-  from_port = 0
-  to_port = 0
-  protocol = "icmp"
-  cidr_blocks = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.allowAllEgress.id
-}
+
 
 
 
